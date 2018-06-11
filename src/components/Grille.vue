@@ -57,13 +57,12 @@ export default {
     },
     changeCase: function (event, player, index) {
       if (this.gameIsRunning) {
-        this.cases[index].value = ValueCaseEnum.X
-        this.jouerCase(index, player)
-
-        if (this.checkWin(player)) {
-          return
+        if (this.jouerCase(index, player)) {
+          if (this.checkWin(player)) {
+            return
+          }
+          this.IAPlay()
         }
-        this.IAPlay()
       }
     },
     IAPlay: function () {
@@ -85,15 +84,27 @@ export default {
       return result
     },
     jouerCase: function (indexCase, player) {
+      if (this.cases[indexCase].value !== ValueCaseEnum.L) {
+        return false
+      }
       if (player === 'user') {
         this.cases[indexCase].value = ValueCaseEnum.X
       } else {
         this.cases[indexCase].value = ValueCaseEnum.O
       }
+      return true
     },
     checkWin: function (player) {
       let text = player === 'user' ? 'You Won new game ?' : 'IA Won new game ?'
       if (this.checkLigne() || this.checkColonne() || this.checkDiagonal()) {
+        if (confirm(text)) {
+          this.startGame()
+        } else {
+          this.gameIsRunning = false
+        }
+      }
+      if (this.checkEgalite()) {
+        text = 'Equality, new game ? '
         if (confirm(text)) {
           this.startGame()
         } else {
@@ -105,8 +116,8 @@ export default {
     checkLigne: function () {
       //  Ligne 1
       if ((this.cases[0].value === this.cases[1].value) &&
-         (this.cases[0].value === this.cases[2].value) &&
-         this.cases[0].value !== ValueCaseEnum.L) {
+        (this.cases[0].value === this.cases[2].value) &&
+        this.cases[0].value !== ValueCaseEnum.L) {
         return true
       }
 
@@ -128,8 +139,8 @@ export default {
     checkColonne: function () {
       //  Ligne 1
       if ((this.cases[0].value === this.cases[3].value) &&
-         (this.cases[0].value === this.cases[6].value) &&
-         this.cases[0].value !== ValueCaseEnum.L) {
+        (this.cases[0].value === this.cases[6].value) &&
+        this.cases[0].value !== ValueCaseEnum.L) {
         return true
       }
 
@@ -151,8 +162,8 @@ export default {
     checkDiagonal: function () {
       //  Ligne 1
       if ((this.cases[0].value === this.cases[4].value) &&
-         (this.cases[0].value === this.cases[8].value) &&
-         this.cases[0].value !== ValueCaseEnum.L) {
+        (this.cases[0].value === this.cases[8].value) &&
+        this.cases[0].value !== ValueCaseEnum.L) {
         return true
       }
 
@@ -163,6 +174,20 @@ export default {
         return true
       }
       return false
+    },
+    checkEgalite: function () {
+      var result = true
+      let continu = true
+      let i = 0
+      while (this.cases.length > i && continu) {
+        if (this.cases[i].value === ValueCaseEnum.L) {
+          result = false
+          console.log(i)
+          continu = false
+        }
+        i++
+      }
+      return result
     }
   }
 }

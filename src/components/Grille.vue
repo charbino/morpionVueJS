@@ -67,19 +67,21 @@ export default {
       }
     },
     IAPlay: function () {
-      console.log('IA PLAY')
-      let nextCase = this.getNextCase()
-      console.log(nextCase)
+      let nextCase = this.getNextCaseIA()
       this.cases[nextCase].value = ValueCaseEnum.O
+      this.checkWin('IA')
     },
-    getNextCase: function () {
-      let result = 23
-      this.cases.forEach(function (item) {
-        if (item.value !== ValueCaseEnum.X) {
-          console.log(item.num)
-          result = item.num
+    getNextCaseIA: function () {
+      var result = null
+      let continu = true
+      let i = 0
+      while (this.cases.length > i && continu) {
+        if (this.cases[i].value === ValueCaseEnum.L) {
+          result = i
+          continu = false
         }
-      })
+        i++
+      }
       return result
     },
     jouerCase: function (indexCase, player) {
@@ -166,7 +168,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   h1, h2 {
     font-weight: normal;

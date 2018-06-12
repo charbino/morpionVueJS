@@ -1,9 +1,10 @@
 <template>
   <div class="grille">
     <h1>{{ msgHello }}</h1>
+    <h2 v-if="difficulte">Difficulté : {{difficulte}}</h2>
     <div id="grille" class="container">
       <div class="wrapper">
-        <div v-for="(item, index) in cases" :key="item.id" class="case" @click="changeCase($event,'user',index)" >{{ item.value }}</div>
+        <div v-for="(item, index) in cases" :key="item.id" class="case" @click="humanPlay($event, index)" >{{ item.value }}</div>
       </div>
     </div>
     <section class="row controls" v-if="!gameIsRunning">
@@ -16,6 +17,12 @@
         <button id="reset" @click="stop">STOP</button>
       </div>
     </section>
+    <section class="row controls" v-if="needDifficulte">
+      <div class="small-12 columns">
+        <button :id="difficulte.facile" @click="setDifficulte(difficulteEnum.facile)">{{difficulteEnum.facile}}</button>
+        <button :id="difficulte.impossible" @click="setDifficulte(difficulteEnum.impossible)">{{difficulteEnum.impossible}}</button>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -26,12 +33,23 @@ let ValueCaseEnum = {
   L: 'L'
 }
 
+let players = {
+  IA: 'IA',
+  human: 'human'
+}
+
 export default {
   name: 'Grille',
   data () {
     return {
       msgHello: 'Bienvenue sur ce morpion',
       gameIsRunning: false,
+      difficulte: 'Facile',
+      needDifficulte: false,
+      difficulteEnum: {
+        facile: 'Facile',
+        impossible: 'Impossible'
+      },
       cases: [
         {num: 1, value: ValueCaseEnum.L},
         {num: 2, value: ValueCaseEnum.L},
@@ -47,7 +65,7 @@ export default {
   },
   methods: {
     startGame: function () {
-      this.gameIsRunning = true
+      this.needDifficulte = true
       this.cases.forEach(function (item) {
         item.value = ValueCaseEnum.L
       })
@@ -55,23 +73,58 @@ export default {
     stop: function () {
       this.gameIsRunning = false
     },
-    changeCase: function (event, player, index) {
+    setDifficulte: function (difficulte) {
+      this.difficulte = difficulte
+      this.needDifficulte = false
+      this.gameIsRunning = true
+    },
+    humanPlay: function (event, index) {
       if (this.gameIsRunning) {
-        if (this.jouerCase(index, player)) {
-          if (this.checkWin(player)) {
-            return
+        if (this.jouerCase(index, players.human)) {
+          if (this.checkWin(players.human)) {
+            this.gameIsRunning = false
+            if (confirm('You Won new game ?')) {
+              this.startGame()
+            }
+          }
+          if (this.checkEgalite()) {
+            this.gameIsRunning = false
+            if (confirm('Equality, new game ? ')) {
+              this.startGame()
+            }
           }
           this.IAPlay()
         }
       }
     },
     IAPlay: function () {
-      let nextCase = this.getNextCaseIA()
+      let nextCase = 0
+      console.log(`Difficulte ${this.difficulte}`)
+      if (this.difficulte === this.difficulteEnum.facile) {
+        nextCase = this.getNextCaseIA()
+      }
+
+      if (this.difficulte === this.difficulteEnum.impossible) {
+        nextCase = this.minMaxAlgo(10)
+        console.log(`IA play ${nextCase}`)
+      }
+
       this.cases[nextCase].value = ValueCaseEnum.O
-      this.checkWin('IA')
+      if (this.checkWin(players.IA)) {
+        this.gameIsRunning = false
+        if (confirm('IA Won new game ?')) {
+          this.startGame()
+        }
+        if (this.checkEgalite()) {
+          this.gameIsRunning = false
+          if (confirm('Equality, new game ? ')) {
+            this.startGame()
+          }
+        }
+      }
     },
     getNextCaseIA: function () {
-      var result = null
+      let result = null
       let continu = true
       let i = 0
       while (this.cases.length > i && continu) {
@@ -87,7 +140,7 @@ export default {
       if (this.cases[indexCase].value !== ValueCaseEnum.L) {
         return false
       }
-      if (player === 'user') {
+      if (player === players.human) {
         this.cases[indexCase].value = ValueCaseEnum.X
       } else {
         this.cases[indexCase].value = ValueCaseEnum.O
@@ -95,99 +148,179 @@ export default {
       return true
     },
     checkWin: function (player) {
-      let text = player === 'user' ? 'You Won new game ?' : 'IA Won new game ?'
-      if (this.checkLigne() || this.checkColonne() || this.checkDiagonal()) {
-        if (confirm(text)) {
-          this.startGame()
-        } else {
-          this.gameIsRunning = false
-        }
-      }
-      if (this.checkEgalite()) {
-        text = 'Equality, new game ? '
-        if (confirm(text)) {
-          this.startGame()
-        } else {
-          this.gameIsRunning = false
-        }
-      }
-      return false
+      let value = player === players.IA ? ValueCaseEnum.O : ValueCaseEnum.X
+      return this.checkLigne(value) || this.checkColonne(value) || this.checkDiagonal(value)
     },
-    checkLigne: function () {
+    checkLigne: function (value) {
       //  Ligne 1
-      if ((this.cases[0].value === this.cases[1].value) &&
-        (this.cases[0].value === this.cases[2].value) &&
-        this.cases[0].value !== ValueCaseEnum.L) {
+      if (this.cases[0].value === this.cases[1].value &&
+          this.cases[0].value === this.cases[2].value &&
+          this.cases[0].value !== ValueCaseEnum.L &&
+          this.cases[0].value === value) {
         return true
       }
 
       //  Ligne 2
-      if ((this.cases[3].value === this.cases[4].value) &&
-        (this.cases[3].value === this.cases[5].value) &&
-        this.cases[3].value !== ValueCaseEnum.L) {
+      if (this.cases[3].value === this.cases[4].value &&
+          this.cases[3].value === this.cases[5].value &&
+          this.cases[3].value !== ValueCaseEnum.L &&
+          this.cases[3].value === value) {
         return true
       }
 
       //  Ligne 3
-      if ((this.cases[6].value === this.cases[7].value) &&
-        (this.cases[6].value === this.cases[8].value) &&
-        this.cases[6].value !== ValueCaseEnum.L) {
+      if (this.cases[6].value === this.cases[7].value &&
+          this.cases[6].value === this.cases[8].value &&
+          this.cases[6].value !== ValueCaseEnum.L &&
+          this.cases[6].value === value) {
         return true
       }
       return false
     },
-    checkColonne: function () {
+    checkColonne: function (value) {
       //  Ligne 1
-      if ((this.cases[0].value === this.cases[3].value) &&
-        (this.cases[0].value === this.cases[6].value) &&
-        this.cases[0].value !== ValueCaseEnum.L) {
+      if (this.cases[0].value === this.cases[3].value &&
+          this.cases[0].value === this.cases[6].value &&
+          this.cases[0].value !== ValueCaseEnum.L &&
+          this.cases[0].value === value) {
         return true
       }
 
       //  Ligne 2
-      if ((this.cases[1].value === this.cases[4].value) &&
-        (this.cases[1].value === this.cases[7].value) &&
-        this.cases[1].value !== ValueCaseEnum.L) {
+      if (this.cases[1].value === this.cases[4].value &&
+          this.cases[1].value === this.cases[7].value &&
+          this.cases[1].value !== ValueCaseEnum.L &&
+          this.cases[1].value === value) {
         return true
       }
 
       //  Ligne 3
-      if ((this.cases[2].value === this.cases[5].value) &&
-        (this.cases[2].value === this.cases[8].value) &&
-        this.cases[2].value !== ValueCaseEnum.L) {
+      if (this.cases[2].value === this.cases[5].value &&
+          this.cases[2].value === this.cases[8].value &&
+          this.cases[2].value !== ValueCaseEnum.L &&
+          this.cases[2].value === value) {
         return true
       }
       return false
     },
-    checkDiagonal: function () {
+    checkDiagonal: function (value) {
       //  Ligne 1
-      if ((this.cases[0].value === this.cases[4].value) &&
-        (this.cases[0].value === this.cases[8].value) &&
-        this.cases[0].value !== ValueCaseEnum.L) {
+      if (this.cases[0].value === this.cases[4].value &&
+          this.cases[0].value === this.cases[8].value &&
+          this.cases[0].value !== ValueCaseEnum.L &&
+          this.cases[0].value === value) {
         return true
       }
 
       //  Ligne 2
-      if ((this.cases[2].value === this.cases[4].value) &&
-        (this.cases[2].value === this.cases[6].value) &&
-        this.cases[2].value !== ValueCaseEnum.L) {
+      if (this.cases[2].value === this.cases[4].value &&
+          this.cases[2].value === this.cases[6].value &&
+          this.cases[2].value !== ValueCaseEnum.L &&
+          this.cases[2].value === value) {
         return true
       }
       return false
     },
     checkEgalite: function () {
-      var result = true
+      let result = true
       let continu = true
       let i = 0
       while (this.cases.length > i && continu) {
         if (this.cases[i].value === ValueCaseEnum.L) {
           result = false
-          console.log(i)
           continu = false
         }
         i++
       }
       return result
+    },
+    minMaxAlgo: function (depth) {
+      console.log('Algo Min max IA')
+      let plateauBis = this.cases
+      let max = -10000
+      let caseAjouer = 0
+      let i = 0
+      let tmp = 0
+      while (plateauBis.length > i) {
+        if (plateauBis[i].value === ValueCaseEnum.L) {
+          console.log(`i = ${i}`)
+          plateauBis[i].value = ValueCaseEnum.O
+          tmp = this.min(plateauBis, depth - 1)
+          console.log(`tmp = ${tmp}`)
+          console.log(`max = ${max}`)
+          if (tmp > max) {
+            max = tmp
+            caseAjouer = i
+            console.log(`caseAjouer = ${caseAjouer}`)
+          }
+          plateauBis[i].value = ValueCaseEnum.L
+        }
+        i++
+      }
+      console.log('caseAjouer ' + caseAjouer)
+      return caseAjouer
+    },
+    max: function (plateau, depth) {
+      if (depth === 0 || !this.gameIsRunning) {
+        return this.eval(plateau)
+      }
+      let max = -10000
+      let tmp = null
+      let i = 0
+
+      while (plateau.length > i) {
+        if (plateau[i].value === ValueCaseEnum.L) {
+          plateau[i].value = ValueCaseEnum.X
+          tmp = this.min(plateau, depth - 1)
+          if (tmp > max) {
+            max = tmp
+          }
+          plateau[i].value = ValueCaseEnum.L
+        }
+        i++
+      }
+      return max
+    },
+    min: function (plateau, depth) {
+      if (depth === 0 || !this.gameIsRunning) {
+        return this.eval(plateau)
+      }
+      let min = 10000
+      let tmp = null
+      let i = 0
+
+      while (plateau.length > i) {
+        if (plateau[i].value === ValueCaseEnum.L) {
+          plateau[i].value = ValueCaseEnum.O
+          tmp = this.max(plateau, depth - 1)
+          if (tmp < min) {
+            min = tmp
+          }
+          plateau[i].value = ValueCaseEnum.L
+        }
+        i++
+      }
+      console.log('[MIN] min ' + min)
+      return min
+    },
+    eval: function (plateau) {
+      let i = 0
+      let nbPions = 0
+      while (plateau.length > i) {
+        // On compte le nombre de pions
+        if (plateau[i].value !== ValueCaseEnum.L) {
+          nbPions++
+        }
+        i++
+      }
+      if (this.checkWin(players.IA)) {
+        return (1000 - nbPions)
+      }
+
+      if (this.checkWin(players.human)) {
+        return (-1000 + nbPions)
+      }
+      return 0
     }
   }
 }

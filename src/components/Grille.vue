@@ -1,7 +1,5 @@
 <template>
   <div class="grille">
-    <h1>{{ msgHello }}</h1>
-    <h2 v-if="difficulte">Difficulté : {{difficulte}}</h2>
     <div id="grille" class="container">
       <div class="wrapper">
         <div v-for="(item, index) in cases" :key="item.id" class="case" @click="humanPlay($event, index)" >{{ item.value }}</div>
@@ -27,24 +25,18 @@
 </template>
 
 <script>
-let ValueCaseEnum = {
-  X: 'X',
-  O: 'O',
-  L: 'L'
-}
+import {eventBus} from '../main.js'
 
-let players = {
-  IA: 'IA',
-  human: 'human'
-}
+import * as MinMaxAlgo from '../lib/MinMaxAlgo.js'
+import * as AlgoSimple from '../lib/AlgoSimple.js'
+import {ValueCaseEnum, players} from '../lib/Enum.js'
 
 export default {
   name: 'Grille',
   data () {
     return {
-      msgHello: 'Bienvenue sur ce morpion',
+      difficulte: '',
       gameIsRunning: false,
-      difficulte: 'Facile',
       needDifficulte: false,
       difficulteEnum: {
         facile: 'Facile',
@@ -73,10 +65,12 @@ export default {
     stop: function () {
       this.gameIsRunning = false
     },
-    setDifficulte: function (difficulte) {
+    setDifficulte (difficulte) {
       this.difficulte = difficulte
       this.needDifficulte = false
       this.gameIsRunning = true
+      // eventBus.changeDifficulte(difficulte)
+      eventBus.$emit('difficulteSet', difficulte)
     },
     humanPlay: function (event, index) {
       if (this.gameIsRunning) {
@@ -99,14 +93,12 @@ export default {
     },
     IAPlay: function () {
       let nextCase = 0
-      console.log(`Difficulte ${this.difficulte}`)
       if (this.difficulte === this.difficulteEnum.facile) {
-        nextCase = this.getNextCaseIA()
+        nextCase = AlgoSimple.getNextCaseIA(this.cases)
       }
 
       if (this.difficulte === this.difficulteEnum.impossible) {
-        nextCase = this.minMaxAlgo(10)
-        console.log(`IA play ${nextCase}`)
+        nextCase = MinMaxAlgo.getCaseIA(this.cases, 10)
       }
 
       this.cases[nextCase].value = ValueCaseEnum.O
@@ -122,19 +114,6 @@ export default {
           }
         }
       }
-    },
-    getNextCaseIA: function () {
-      let result = null
-      let continu = true
-      let i = 0
-      while (this.cases.length > i && continu) {
-        if (this.cases[i].value === ValueCaseEnum.L) {
-          result = i
-          continu = false
-        }
-        i++
-      }
-      return result
     },
     jouerCase: function (indexCase, player) {
       if (this.cases[indexCase].value !== ValueCaseEnum.L) {
@@ -233,104 +212,12 @@ export default {
         i++
       }
       return result
-    },
-    minMaxAlgo: function (depth) {
-      console.log('Algo Min max IA')
-      let plateauBis = this.cases
-      let max = -10000
-      let caseAjouer = 0
-      let i = 0
-      let tmp = 0
-      while (plateauBis.length > i) {
-        if (plateauBis[i].value === ValueCaseEnum.L) {
-          console.log(`i = ${i}`)
-          plateauBis[i].value = ValueCaseEnum.O
-          tmp = this.min(plateauBis, depth - 1)
-          console.log(`tmp = ${tmp}`)
-          console.log(`max = ${max}`)
-          if (tmp > max) {
-            max = tmp
-            caseAjouer = i
-            console.log(`caseAjouer = ${caseAjouer}`)
-          }
-          plateauBis[i].value = ValueCaseEnum.L
-        }
-        i++
-      }
-      console.log('caseAjouer ' + caseAjouer)
-      return caseAjouer
-    },
-    max: function (plateau, depth) {
-      if (depth === 0 || !this.gameIsRunning) {
-        return this.eval(plateau)
-      }
-      let max = -10000
-      let tmp = null
-      let i = 0
-
-      while (plateau.length > i) {
-        if (plateau[i].value === ValueCaseEnum.L) {
-          plateau[i].value = ValueCaseEnum.X
-          tmp = this.min(plateau, depth - 1)
-          if (tmp > max) {
-            max = tmp
-          }
-          plateau[i].value = ValueCaseEnum.L
-        }
-        i++
-      }
-      return max
-    },
-    min: function (plateau, depth) {
-      if (depth === 0 || !this.gameIsRunning) {
-        return this.eval(plateau)
-      }
-      let min = 10000
-      let tmp = null
-      let i = 0
-
-      while (plateau.length > i) {
-        if (plateau[i].value === ValueCaseEnum.L) {
-          plateau[i].value = ValueCaseEnum.O
-          tmp = this.max(plateau, depth - 1)
-          if (tmp < min) {
-            min = tmp
-          }
-          plateau[i].value = ValueCaseEnum.L
-        }
-        i++
-      }
-      console.log('[MIN] min ' + min)
-      return min
-    },
-    eval: function (plateau) {
-      let i = 0
-      let nbPions = 0
-      while (plateau.length > i) {
-        // On compte le nombre de pions
-        if (plateau[i].value !== ValueCaseEnum.L) {
-          nbPions++
-        }
-        i++
-      }
-      if (this.checkWin(players.IA)) {
-        return (1000 - nbPions)
-      }
-
-      if (this.checkWin(players.human)) {
-        return (-1000 + nbPions)
-      }
-      return 0
     }
   }
 }
 </script>
 
 <style scoped>
-  h1, h2 {
-    font-weight: normal;
-  }
-
   ul {
     list-style-type: none;
     padding: 0;

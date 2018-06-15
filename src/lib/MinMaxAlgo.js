@@ -12,7 +12,7 @@ export function getCaseIA (cases, depth) {
     if (plateauBis[i].value === ValueCaseEnum.L) {
       plateauBis[i].value = ValueCaseEnum.O
       tmp = min(plateauBis, depth - 1)
-      if (tmp > max || ((tmp === max) && (Math.random() % 2 === 0)))
+      if (tmp > max || ((tmp === max) && (Math.random() % 2 === 0))) {
         max = tmp
         caseAjouer = i
       }

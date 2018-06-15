@@ -1,4 +1,5 @@
 import {ValueCaseEnum, players} from './Enum.js'
+import * as Game from './Game'
 
 export function getCaseIA (cases, depth) {
   console.log('Algo Min max IA')
@@ -23,7 +24,7 @@ export function getCaseIA (cases, depth) {
 }
 
 function max (plateau, depth) {
-  if (depth === 0 || !this.gameIsRunning) {
+  if (depth === 0 || Game.endGame(plateau)) {
     return evaluation(plateau)
   }
   let max = -10000
@@ -45,7 +46,7 @@ function max (plateau, depth) {
 }
 
 function min (plateau, depth) {
-  if (depth === 0 || !this.gameIsRunning) {
+  if (depth === 0 || Game.endGame(plateau)) {
     return evaluation(plateau)
   }
   let min = 10000
@@ -76,11 +77,11 @@ function evaluation (plateau) {
     }
     i++
   }
-  if (this.checkWin(players.IA)) {
+  if (Game.checkWin(players.IA, plateau)) {
     return (1000 - nbPions)
   }
 
-  if (this.checkWin(players.human)) {
+  if (Game.checkWin(players.human, plateau)) {
     return (-1000 + nbPions)
   }
   return 0

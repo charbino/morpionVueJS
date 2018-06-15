@@ -16,6 +16,16 @@ export function checkWin (player, cases) {
   return checkLigne(cases, value) || checkColonne(cases, value) || checkDiagonal(cases, value)
 }
 
+export function endGame (cases) {
+  // check IA win
+  let end = checkLigne(cases, ValueCaseEnum.O) || checkColonne(cases, ValueCaseEnum.O) || checkDiagonal(cases, ValueCaseEnum.O)
+
+  // check USER win
+  end &= checkLigne(cases, ValueCaseEnum.X) || checkColonne(cases, ValueCaseEnum.X) || checkDiagonal(cases, ValueCaseEnum.X)
+
+  return end
+}
+
 export function checkLigne (cases, value) {
   //  Ligne 1
   if (cases[0].value === cases[1].value &&

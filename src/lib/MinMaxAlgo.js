@@ -84,5 +84,5 @@ function evaluation (plateau) {
   if (Game.checkWin(players.human, plateau)) {
     return (-1000 + nbPions)
   }
-  return Game.nbSeries(ValueCaseEnum.O) - Game.nbSeries(ValueCaseEnum.X)
+  return Game.nbSeries(plateau, ValueCaseEnum.O) - Game.nbSeries(plateau, ValueCaseEnum.X)
 }

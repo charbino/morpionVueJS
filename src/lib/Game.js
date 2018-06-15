@@ -114,7 +114,7 @@ export function checkEgalite (cases) {
 }
 
 export function nbSeries (cases, valueCase) {
-  return nbSerieLigne() + nbSerieColonne() + nbSerieDiagonal()
+  return nbSerieLigne(cases, valueCase) + nbSerieColonne(cases, valueCase) + nbSerieDiagonal(cases, valueCase)
 }
 
 // nombre de serie de deux en ligne

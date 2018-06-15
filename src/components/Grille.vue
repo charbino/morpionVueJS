@@ -71,6 +71,7 @@ export default {
       this.difficulte = difficulte
       this.needDifficulte = false
       eventBus.$emit('difficulteSet', difficulte)
+      this.gameIsRunning = true
     },
     humanPlay: function (event, index) {
       if (this.gameIsRunning) {
@@ -107,7 +108,7 @@ export default {
         if (confirm('IA Won new game ?')) {
           this.startGame()
         }
-        if (Game.checkEgalite()) {
+        if (Game.checkEgalite(this.cases)) {
           this.gameIsRunning = false
           if (confirm('Equality, new game ? ')) {
             this.startGame()

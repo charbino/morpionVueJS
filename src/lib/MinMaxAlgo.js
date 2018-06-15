@@ -3,7 +3,6 @@ import * as Game from './Game'
 import * as AlgoSImple from './AlgoSimple'
 
 export function getCaseIA (cases, depth) {
-  console.log('Algo Min max IA :' + cases[0].value)
   let plateauBis = cases
   let max = -10000
   let caseAjouer = AlgoSImple.getNextCaseIA(plateauBis)
@@ -11,10 +10,9 @@ export function getCaseIA (cases, depth) {
   let tmp = 0
   while (plateauBis.length > i) {
     if (plateauBis[i].value === ValueCaseEnum.L) {
-      console.log('Attention ' + plateauBis[i].value + ' - ' + i)
       plateauBis[i].value = ValueCaseEnum.O
       tmp = min(plateauBis, depth - 1)
-      if (tmp > max) {
+      if (tmp > max || ((tmp === max) && (Math.random() % 2 === 0)))
         max = tmp
         caseAjouer = i
       }
@@ -22,7 +20,6 @@ export function getCaseIA (cases, depth) {
     }
     i++
   }
-  console.log(`Case à jouer : ${caseAjouer}`)
   return caseAjouer
 }
 
@@ -38,7 +35,7 @@ function max (plateau, depth) {
     if (plateau[i].value === ValueCaseEnum.L) {
       plateau[i].value = ValueCaseEnum.X
       tmp = min(plateau, depth - 1)
-      if (tmp > max) {
+      if (tmp > max || ((tmp === max) && (Math.random() % 2 === 0))) {
         max = tmp
       }
       plateau[i].value = ValueCaseEnum.L
@@ -60,7 +57,7 @@ function min (plateau, depth) {
     if (plateau[i].value === ValueCaseEnum.L) {
       plateau[i].value = ValueCaseEnum.O
       tmp = max(plateau, depth - 1)
-      if (tmp < min) {
+      if (tmp < min || ((tmp === min) && (Math.random() % 2 === 0))) {
         min = tmp
       }
       plateau[i].value = ValueCaseEnum.L

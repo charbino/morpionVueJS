@@ -70,8 +70,6 @@ export default {
     setDifficulte (difficulte) {
       this.difficulte = difficulte
       this.needDifficulte = false
-
-      // eventBus.changeDifficulte(difficulte)
       eventBus.$emit('difficulteSet', difficulte)
     },
     humanPlay: function (event, index) {
@@ -99,7 +97,6 @@ export default {
         nextCase = AlgoSimple.getNextCaseIA(this.cases)
       }
 
-      console.log('IA PLAY ' + this.cases[0].value)
       if (this.difficulte === this.difficulteEnum.impossible) {
         nextCase = MinMaxAlgo.getCaseIA(this.cases, 10)
       }

@@ -99,6 +99,7 @@ export default {
         nextCase = AlgoSimple.getNextCaseIA(this.cases)
       }
 
+      console.log('IA PLAY ' + this.cases[0].value)
       if (this.difficulte === this.difficulteEnum.impossible) {
         nextCase = MinMaxAlgo.getCaseIA(this.cases, 10)
       }

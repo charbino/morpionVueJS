@@ -112,3 +112,79 @@ export function checkEgalite (cases) {
   }
   return result
 }
+
+export function nbSeries (cases, valueCase) {
+  return nbSerieLigne() + nbSerieColonne() + nbSerieDiagonal()
+}
+
+// nombre de serie de deux en ligne
+function nbSerieLigne (cases, valueCase) {
+  let serie = 0
+
+  if ((cases[0].value === valueCase &&
+      cases[0].value === cases[1].value) ||
+      (cases[1].value === valueCase &&
+          cases[1].value === cases[2].value)) {
+    serie++
+  }
+  if ((cases[3].value === valueCase &&
+          cases[3].value === cases[4].value) ||
+      (cases[4].value === valueCase &&
+          cases[4].value === cases[5].value)) {
+    serie++
+  }
+  if ((cases[6].value === valueCase &&
+          cases[6].value === cases[7].value) ||
+      (cases[7].value === valueCase &&
+          cases[7].value === cases[8].value)) {
+    serie++
+  }
+
+  return serie
+}
+
+// nombre de serie de deux en colonne
+function nbSerieColonne (cases, valueCase) {
+  let serie = 0
+
+  if ((cases[0].value === valueCase &&
+          cases[0].value === cases[3].value) ||
+      (cases[3].value === valueCase &&
+          cases[3].value === cases[6].value)) {
+    serie++
+  }
+  if ((cases[1].value === valueCase &&
+          cases[1].value === cases[4].value) ||
+      (cases[4].value === valueCase &&
+          cases[4].value === cases[7].value)) {
+    serie++
+  }
+  if ((cases[2].value === valueCase &&
+          cases[2].value === cases[5].value) ||
+      (cases[5].value === valueCase &&
+          cases[5].value === cases[8].value)) {
+    serie++
+  }
+
+  return serie
+}
+
+// nombre de serie de deux en colonne
+function nbSerieDiagonal (cases, valueCase) {
+  let serie = 0
+
+  if ((cases[4].value === valueCase &&
+          cases[4].value === cases[0].value) ||
+      (cases[4].value === valueCase &&
+          cases[4].value === cases[8].value)) {
+    serie++
+  }
+  if ((cases[5].value === valueCase &&
+          cases[5].value === cases[2].value) ||
+      (cases[5].value === valueCase &&
+          cases[5].value === cases[6].value)) {
+    serie++
+  }
+
+  return serie
+}

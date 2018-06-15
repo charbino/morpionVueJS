@@ -1,15 +1,17 @@
 import {ValueCaseEnum, players} from './Enum.js'
 import * as Game from './Game'
+import * as AlgoSImple from './AlgoSimple'
 
 export function getCaseIA (cases, depth) {
-  console.log('Algo Min max IA')
+  console.log('Algo Min max IA :' + cases[0].value)
   let plateauBis = cases
   let max = -10000
-  let caseAjouer = 0
+  let caseAjouer = AlgoSImple.getNextCaseIA(plateauBis)
   let i = 0
   let tmp = 0
   while (plateauBis.length > i) {
     if (plateauBis[i].value === ValueCaseEnum.L) {
+      console.log('Attention ' + plateauBis[i].value + ' - ' + i)
       plateauBis[i].value = ValueCaseEnum.O
       tmp = min(plateauBis, depth - 1)
       if (tmp > max) {
@@ -85,5 +87,5 @@ function evaluation (plateau) {
   if (Game.checkWin(players.human, plateau)) {
     return (-1000 + nbPions)
   }
-  return 0
+  return Game.nbSeries(ValueCaseEnum.O) - Game.nbSeries(ValueCaseEnum.X)
 }

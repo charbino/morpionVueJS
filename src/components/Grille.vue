@@ -109,7 +109,7 @@ export default {
         if (confirm('IA Won new game ?')) {
           this.startGame()
         }
-        if (this.checkEgalite()) {
+        if (Game.checkEgalite()) {
           this.gameIsRunning = false
           if (confirm('Equality, new game ? ')) {
             this.startGame()

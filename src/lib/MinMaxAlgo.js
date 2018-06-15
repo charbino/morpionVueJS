@@ -20,6 +20,7 @@ export function getCaseIA (cases, depth) {
     }
     i++
   }
+  console.log(`Case à jouer : ${caseAjouer}`)
   return caseAjouer
 }
 

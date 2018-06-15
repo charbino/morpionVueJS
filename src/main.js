@@ -6,12 +6,6 @@ import App from './App.vue'
 Vue.config.productionTip = false
 
 export const eventBus = new Vue({
-  // methods: {
-  //   changeDifficulte () {
-  //     // eslint-disable-next-line
-  //     this.$emit('difficulteSet', difficulte)
-  //   }
-  // }
 })
 
 /* eslint-disable no-new */
